@@ -16,6 +16,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name="org.sonarsource.sportstalker.MapActivity"
+            android:label="@string/title_activity_map" >
+        </activity>
     </application>
-    <uses-permission android:name="android.permission.ACCESS_FINE_  LOCATION" />
+
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
 </manifest>

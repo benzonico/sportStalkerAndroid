@@ -3,26 +3,23 @@ package org.sonarsource.sportstalker;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
-import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
+import android.widget.TextView;
 
-public class Register extends Activity {
+public class MapActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_register);
+        setContentView(R.layout.activity_map);
 
         if (savedInstanceState == null) {
             getFragmentManager().beginTransaction()
@@ -31,12 +28,41 @@ public class Register extends Activity {
         }
     }
 
+    public class MyLocationListener implements LocationListener {
+
+        private TextView textView;
+
+        public MyLocationListener(TextView textView) {
+            this.textView = textView;
+        }
+
+        @Override
+        public void onLocationChanged(Location location) {
+            textView.setText(" "+location.getLatitude()+" "+location.getLongitude());
+        }
+
+        @Override
+        public void onStatusChanged(String s, int i, Bundle bundle) {
+
+        }
+
+        @Override
+        public void onProviderEnabled(String s) {
+
+        }
+
+        @Override
+        public void onProviderDisabled(String s) {
+
+        }
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.register, menu);
+        getMenuInflater().inflate(R.menu.map, menu);
         return true;
     }
 
@@ -55,31 +81,19 @@ public class Register extends Activity {
     /**
      * A placeholder fragment containing a simple view.
      */
-    public class PlaceholderFragment extends Fragment implements View.OnClickListener {
-
-        private Button button;
-        private String username;
+    public class PlaceholderFragment extends Fragment {
 
         public PlaceholderFragment() {
         }
 
-
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_register, container, false);
-            button = (Button) rootView.findViewById(R.id.trackButton);
-            EditText editText = (EditText) rootView.findViewById(R.id.username);
-            username = editText.getText().toString();
-            button.setOnClickListener(this);
+            View rootView = inflater.inflate(R.layout.fragment_map, container, false);
+
+            LocationManager mlocManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+            LocationListener mlocListener = new MyLocationListener((TextView) rootView.findViewById(R.id.text));
+            mlocManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 500, 0, mlocListener);
             return rootView;
-        }
-
-        @Override
-        public void onClick(View view) {
-            ((Button) view).setText("CLICKED!");
-            startActivity(new Intent(Register.this, MapActivity.class));
-
-
         }
     }
 
