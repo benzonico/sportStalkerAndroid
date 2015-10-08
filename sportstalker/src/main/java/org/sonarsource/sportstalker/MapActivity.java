@@ -3,6 +3,7 @@ package org.sonarsource.sportstalker;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
+import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -16,9 +17,14 @@ import android.widget.TextView;
 
 public class MapActivity extends Activity {
 
+    public static final String USER_ID = "USER_ID";
+    private String userId;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Intent intent = getIntent();
+        userId = intent.getStringExtra(USER_ID);
         setContentView(R.layout.activity_map);
 
         if (savedInstanceState == null) {
@@ -38,7 +44,10 @@ public class MapActivity extends Activity {
 
         @Override
         public void onLocationChanged(Location location) {
-            textView.setText(" "+location.getLatitude()+" "+location.getLongitude());
+            if (userId != null) {
+                UserServices.INSTANCE.updatePosition(userId, ""+location.getLatitude(), ""+location.getLongitude());
+            }
+            textView.setText(" " + location.getLatitude() + " " + location.getLongitude());
         }
 
         @Override
@@ -60,7 +69,7 @@ public class MapActivity extends Activity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        
+
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.map, menu);
         return true;

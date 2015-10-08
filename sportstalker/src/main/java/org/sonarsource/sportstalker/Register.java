@@ -2,13 +2,9 @@ package org.sonarsource.sportstalker;
 
 import android.app.Activity;
 import android.app.Fragment;
-import android.content.Context;
 import android.content.Intent;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -57,8 +53,7 @@ public class Register extends Activity {
      */
     public class PlaceholderFragment extends Fragment implements View.OnClickListener {
 
-        private Button button;
-        private String username;
+        private EditText editText;
 
         public PlaceholderFragment() {
         }
@@ -67,19 +62,27 @@ public class Register extends Activity {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_register, container, false);
-            button = (Button) rootView.findViewById(R.id.trackButton);
-            EditText editText = (EditText) rootView.findViewById(R.id.username);
-            username = editText.getText().toString();
-            button.setOnClickListener(this);
+            ((Button) rootView.findViewById(R.id.trackButton)).setOnClickListener(this);
+            editText = (EditText) rootView.findViewById(R.id.username);
             return rootView;
         }
 
         @Override
         public void onClick(View view) {
-            ((Button) view).setText("CLICKED!");
-            startActivity(new Intent(Register.this, MapActivity.class));
-
-
+            new DownloadWebpageTask().execute(editText.getText().toString());
+        }
+    }
+    private class DownloadWebpageTask extends AsyncTask<String, Void, String> {
+        @Override
+        protected String doInBackground(String... username) {
+            return UserServices.INSTANCE.registerNewUser(username[0]);
+        }
+        // onPostExecute displays the results of the AsyncTask.
+        @Override
+        protected void onPostExecute(String result) {
+            Intent intent = new Intent(Register.this, MapActivity.class);
+            intent.putExtra(MapActivity.USER_ID, result);
+            Register.this.startActivity(intent);
         }
     }
 

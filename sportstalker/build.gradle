@@ -1,6 +1,14 @@
 apply plugin: 'android'
-
+repositories {
+    mavenLocal()
+}
 android {
+    packagingOptions {
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/services/com.fasterxml.jackson.core.JsonFactory'
+        exclude 'META-INF/services/com.fasterxml.jackson.core.ObjectCodec'
+    }
     compileSdkVersion 18
     buildToolsVersion "19.0.3"
 
@@ -19,6 +27,7 @@ android {
 }
 
 dependencies {
-    /*compile 'com.android.support:appcompat-v7:19.0.1'
-    compile 'com.google.android.gms:play-services:8.1.0'*/
+    compile 'net.apispark.webapi:SportStalker:1.0-SNAPSHOT'
+    //compile 'com.android.support:appcompat-v7:19.0.1'
+    //compile 'com.google.android.gms:play-services:8.1.0'
 }
