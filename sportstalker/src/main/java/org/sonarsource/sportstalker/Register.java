@@ -10,7 +10,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 
 public class Register extends Activity {
@@ -62,7 +61,7 @@ public class Register extends Activity {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_register, container, false);
-            ((Button) rootView.findViewById(R.id.trackButton)).setOnClickListener(this);
+            rootView.findViewById(R.id.trackButton).setOnClickListener(this);
             editText = (EditText) rootView.findViewById(R.id.username);
             return rootView;
         }

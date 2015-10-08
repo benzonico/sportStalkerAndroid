@@ -2,8 +2,10 @@ package org.sonarsource.sportstalker;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -18,15 +20,23 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MapActivity extends Activity {
 
     public static final String USER_ID = "USER_ID";
     private String userId;
+    private TextView textView;
+    private List<Location> locations = new ArrayList<Location>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Intent intent = getIntent();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
+        registerReceiver(new Receiver(), filter);
         userId = intent.getStringExtra(USER_ID);
         setContentView(R.layout.activity_map);
 
@@ -37,18 +47,32 @@ public class MapActivity extends Activity {
         }
     }
 
+    private class Receiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            boolean isOnline = isOnline();
+            textView.setText(textView.getText() + "Online " + isOnline);
+            if (isOnline) {
+                sendLocations();
+            }
+        }
+    }
+
+    private void sendLocations() {
+        new SendGPSDataTask().execute(locations.toArray(new Location[locations.size()]));
+    }
+
     public class MyLocationListener implements LocationListener {
 
-        private TextView textView;
 
-        public MyLocationListener(TextView textView) {
-            this.textView = textView;
+        public MyLocationListener() {
         }
 
         @Override
         public void onLocationChanged(Location location) {
-            if (userId != null) {
-                new SendGPSDataTask().execute(location);
+            locations.add(location);
+            if (isOnline()) {
+                sendLocations();
             }
             textView.setText(" " + location.getLatitude() + " " + location.getLongitude());
         }
@@ -68,6 +92,7 @@ public class MapActivity extends Activity {
 
         }
     }
+
     public boolean isOnline() {
         ConnectivityManager cm =
                 (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -78,11 +103,17 @@ public class MapActivity extends Activity {
     private class SendGPSDataTask extends AsyncTask<Location, Void, Void> {
         @Override
         protected Void doInBackground(Location... locations) {
-            if(isOnline()) {
-                Location location = locations[0];
-                UserServices.INSTANCE.updatePosition(userId, ""+location.getLatitude(), ""+location.getLongitude());
+            if (isOnline()) {
+                for (Location location : locations) {
+                    UserServices.INSTANCE.updatePosition(userId, "" + location.getLatitude(), "" + location.getLongitude());
+                }
             }
             return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            locations.clear();
         }
     }
 
@@ -119,7 +150,8 @@ public class MapActivity extends Activity {
             View rootView = inflater.inflate(R.layout.fragment_map, container, false);
 
             LocationManager mlocManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-            LocationListener mlocListener = new MyLocationListener((TextView) rootView.findViewById(R.id.text));
+            textView = (TextView) rootView.findViewById(R.id.text);
+            LocationListener mlocListener = new MyLocationListener();
             mlocManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 500, 0, mlocListener);
             return rootView;
         }
