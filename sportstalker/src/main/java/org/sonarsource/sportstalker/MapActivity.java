@@ -7,6 +7,9 @@ import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -45,7 +48,7 @@ public class MapActivity extends Activity {
         @Override
         public void onLocationChanged(Location location) {
             if (userId != null) {
-                UserServices.INSTANCE.updatePosition(userId, ""+location.getLatitude(), ""+location.getLongitude());
+                new SendGPSDataTask().execute(location);
             }
             textView.setText(" " + location.getLatitude() + " " + location.getLongitude());
         }
@@ -65,7 +68,23 @@ public class MapActivity extends Activity {
 
         }
     }
+    public boolean isOnline() {
+        ConnectivityManager cm =
+                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        return netInfo != null && netInfo.isConnectedOrConnecting();
+    }
 
+    private class SendGPSDataTask extends AsyncTask<Location, Void, Void> {
+        @Override
+        protected Void doInBackground(Location... locations) {
+            if(isOnline()) {
+                Location location = locations[0];
+                UserServices.INSTANCE.updatePosition(userId, ""+location.getLatitude(), ""+location.getLongitude());
+            }
+            return null;
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

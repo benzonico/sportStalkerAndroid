@@ -69,10 +69,10 @@ public class Register extends Activity {
 
         @Override
         public void onClick(View view) {
-            new DownloadWebpageTask().execute(editText.getText().toString());
+            new RegisterUserTask().execute(editText.getText().toString());
         }
     }
-    private class DownloadWebpageTask extends AsyncTask<String, Void, String> {
+    private class RegisterUserTask extends AsyncTask<String, Void, String> {
         @Override
         protected String doInBackground(String... username) {
             return UserServices.INSTANCE.registerNewUser(username[0]);
